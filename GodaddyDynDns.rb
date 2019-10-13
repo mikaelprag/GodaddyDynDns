@@ -20,6 +20,10 @@ class GoDaddyDynDns
     'Accept': 'application/json'
   }
 
+  def self.log(text)
+    puts "[#{Time.now.strftime('%Y-%m-%d %H:%M')}]: #{text}"
+  end
+
   def self.get_registered_ip
     endpoint = "v1/domains/solutioncottage.com/records/A/#{C_NAME}"
     full_url = C_URL + endpoint
@@ -38,19 +42,19 @@ class GoDaddyDynDns
     dns_ip = get_registered_ip
 
     if dns_ip.empty?
-      puts "DNS lookup failed for #{C_NAME}"
+      log "DNS lookup failed for #{C_NAME}"
     elsif external_ip.empty?
-      puts "External IP lookup failed for #{C_NAME}"
+      log "External IP lookup failed for #{C_NAME}"
     elsif dns_ip.eql?(external_ip)
-      puts "DNS IP and External IP are the same for #{C_NAME}"
+      log "DNS IP and External IP are the same for #{C_NAME}"
     else
       data = [{ data: external_ip }]
       response = HTTParty.put(full_url, body: data.to_json, headers: C_HEADERS)
       if response.code.eql?(200)
-        puts "IP was successfully updated for #{C_NAME}!"
+        log "IP was successfully updated for #{C_NAME}!"
         return true
       else
-        puts "Failed to update IP for #{C_NAME}!"
+        log "Failed to update IP for #{C_NAME}!"
       end
     end
     return false
@@ -60,6 +64,7 @@ class GoDaddyDynDns
     response = HTTParty.get("http://ifconfig.co/ip")
     response.code.eql?(200) ? response.body.delete("\n") : nil
   end
+
 
 end
 
