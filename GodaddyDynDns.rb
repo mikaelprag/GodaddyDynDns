@@ -13,6 +13,7 @@ class GoDaddyDynDns
   C_KEY = ''
   C_SECRET = ''
   C_NAME = ''
+  C_PROVIDER = 'http://ifconfig.co/ip'
 
   C_HEADERS = {
     'Authorization': "sso-key #{C_KEY}:#{C_SECRET}",
@@ -46,12 +47,12 @@ class GoDaddyDynDns
     elsif external_ip.empty?
       log "External IP lookup failed for #{C_NAME}"
     elsif dns_ip.eql?(external_ip)
-      log "DNS IP and External IP are the same for #{C_NAME}"
+      log "DNS IP and External IP are the same for #{C_NAME} (#{external_ip})"
     else
       data = [{ data: external_ip }]
       response = HTTParty.put(full_url, body: data.to_json, headers: C_HEADERS)
       if response.code.eql?(200)
-        log "IP was successfully updated for #{C_NAME}!"
+        log "IP was successfully updated for #{C_NAME}! (#{external_ip})"
         return true
       else
         log "Failed to update IP for #{C_NAME}!"
@@ -61,7 +62,7 @@ class GoDaddyDynDns
   end
 
   def self.get_external_ip
-    response = HTTParty.get("http://ifconfig.co/ip")
+    response = HTTParty.get(C_PROVIDER)
     response.code.eql?(200) ? response.body.delete("\n") : nil
   end
 
